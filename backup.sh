@@ -1,25 +1,24 @@
 #!/bin/bash 
 
-# backup location
-backupPath="/home/tharris/box.com/ubu/backup"
-backupList="/home/tharris/backup-script/files.txt"
-backupListContext="/"
+# config
+mount="/path/to/mount"
+targetBasePath="/path/to/mount/backup"
+list="/path/to/files.txt"
+listContext="/"
+
 mkdir -p "$backupPath"
 
 function backup {
     # (u) update, (r) recursive, (R) keep folder structure, (v) verbose
-    rsync -urRv --no-perms --no-owner --no-group --recursive --files-from="$backupList" "$backupListContext" "$backupPath"
-    # exit 0
+    rsync -urRv --no-perms --no-owner --no-group --recursive --files-from="$list" "$listContext" "$targetBasePath"
 }
 
-# Make sure box.com is mounted
-mount="/home/tharris/box.com"
-
+# Verify mount before attempting backup
 if grep -qs "$mount" /proc/mounts; then
-  echo "It's mounted."
+  echo "$mount is already mounted."
   backup
 else
-  echo "It's not mounted."
+  echo "$mount is not mounted. Attempting to mount..."
   mount "$mount"
   if [ $? -eq 0 ]; then
    echo "Mount success!"
@@ -28,4 +27,3 @@ else
    echo "Something went wrong with the mount..."
   fi
 fi
-
